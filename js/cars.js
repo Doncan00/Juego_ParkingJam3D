@@ -1,17 +1,24 @@
 class Car {
-    constructor(x, y, width, height, color, direction) {
+    constructor(x, y, width, height, imageIndex, direction) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.color = color;
-        this.direction = direction; //Vertical /// Horizontal
+        this.imageIndex = imageIndex;
+        this.direction = direction;
     }
 
     draw() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x * gridSize, this.y * gridSize, this.width * gridSize, this.height * gridSize);
+        const img = carImages[this.imageIndex];
+        if (img) {
+            ctx.drawImage(
+                img,
+                this.x * gridSize, this.y * gridSize,
+                this.width * gridSize, this.height * gridSize
+            );
+        }
     }
+
 
     containsPoint(px, py) {
         return px >= this.x * gridSize && px <= (this.x + this.width) * gridSize &&
@@ -63,7 +70,6 @@ class Car {
     moveAutomatically() {
         if (isCarMoving) return;
 
-
         let dx = 0, dy = 0;
         if (this.height === 1) {
             dx = Math.random() > 0.5 ? 1 : -1; 
@@ -86,7 +92,6 @@ class Car {
                 isCarMoving = false;
             }
 
-
             for (let exit of exits) {
                 if (this.isInExit(exit)) {
                     score++;
@@ -104,8 +109,6 @@ class Car {
             }
         }, 100);
     }
-
-    
 
     isInExit(exit) {
         return (

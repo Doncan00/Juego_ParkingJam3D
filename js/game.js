@@ -5,13 +5,33 @@ let cars = [];
 let score = 0;
 let isCarMoving = false;
 
+const carImages = {};
+
+function loadCarImages(callback) {
+    let imagesLoaded = 0;
+    carSizes.forEach((carSize, index) => {
+        const img = new Image();
+        img.src = carSize.imageSrc;
+        img.onload = () => {
+            carImages[index] = img;
+            imagesLoaded++;
+            if (imagesLoaded === carSizes.length) {
+                callback();
+            }
+        };
+    });
+}
+
+
+
 const carSizes = [
-    { width: 1, height: 1 },
-    { width: 2, height: 1 },
-    { width: 1, height: 2 },
-    { width: 3, height: 1 },
-    { width: 1, height: 3 }
+    { width: 1, height: 1, imageSrc: './img/carHor1.png' },
+    { width: 1, height: 2, imageSrc: './img/carVer2.png' },
+    { width: 1, height: 3, imageSrc: './img/carVer3.png' },
+    { width: 2, height: 1, imageSrc: './img/carHor2.png' },
+    { width: 3, height: 1, imageSrc: './img/carHor3.png' }
 ];
+
 
 function getRandomColor() {
     const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black'];
@@ -61,21 +81,20 @@ function getRandomPosition(size) {
 
 function createRandomCars(numCars) {
     for (let i = 0; i < numCars; i++) {
-        const size = carSizes[Math.floor(Math.random() * carSizes.length)];
-        const direction = size.width === 1 ? 'vertical' : 'horizontal';
+        const carSize = carSizes[Math.floor(Math.random() * carSizes.length)]; // Selecciona un tamaño aleatorio
+        const direction = carSize.width === 1 ? 'vertical' : 'horizontal'; // Determina la dirección basándose en el tamaño
 
         let position;
         do {
-            position = getRandomPosition(size);
+            position = getRandomPosition(carSize);
         } while (position === null);
 
         const { x, y } = position;
 
-        cars.push(new Car(x, y, size.width, size.height, getRandomColor(), direction));
+         cars.push(new Car(x, y, carSize.width, carSize.height, carSizes.indexOf(carSize), direction));
     }
 }
 
-createRandomCars(9);
 
 canvas.addEventListener('click', (e) => {
     if (isCarMoving) return;
@@ -111,4 +130,8 @@ function drawParkingLot() {
     ctx.fillText("Puntaje: " + score, 10, 20);
 }
 
-drawParkingLot();
+
+loadCarImages(() => {
+    createRandomCars(9);
+    drawParkingLot();
+});

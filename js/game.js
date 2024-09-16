@@ -22,8 +22,6 @@ function loadCarImages(callback) {
     });
 }
 
-
-
 const carSizes = [
     { width: 1, height: 1, imageSrc: './img/carHor1.png' },
     { width: 1, height: 2, imageSrc: './img/carVer2.png' },
@@ -32,14 +30,8 @@ const carSizes = [
     { width: 3, height: 1, imageSrc: './img/carHor3.png' }
 ];
 
-
-function getRandomColor() {
-    const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black'];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
-
 function isPositionValid(x, y, width, height) {
-    if (x < 1 || y < 1 || x + width > parkingLotWidth - 1 || y + height > parkingLotHeight - 1) {
+    if (x < 0 || y < 0 || x + width > parkingLotWidth || y + height > parkingLotHeight) {
         return false;
     }
 
@@ -57,8 +49,6 @@ function isPositionValid(x, y, width, height) {
     return true;
 }
 
-
-
 function getRandomPosition(size) {
     const { width, height } = size;
     let x, y;
@@ -72,29 +62,36 @@ function getRandomPosition(size) {
     } while (!isPositionValid(x, y, width, height) && attempts < maxAttempts);
 
     if (attempts >= maxAttempts) {
-        console.error("No se pudo encontrar una posición válida para el carro.");
         return null;
     }
 
     return { x, y };
 }
 
-function createRandomCars(numCars) {
-    for (let i = 0; i < numCars; i++) {
-        const carSize = carSizes[Math.floor(Math.random() * carSizes.length)]; // Selecciona un tamaño aleatorio
-        const direction = carSize.width === 1 ? 'vertical' : 'horizontal'; // Determina la dirección basándose en el tamaño
+function fillParkingLot() {
+    let attempts = 0;
+    const maxAttempts = 1000;
 
-        let position;
-        do {
-            position = getRandomPosition(carSize);
-        } while (position === null);
+    while (attempts < maxAttempts) {
+        const carSize = carSizes[Math.floor(Math.random() * carSizes.length)];
+        let position = getRandomPosition(carSize);
 
-        const { x, y } = position;
+        if (position !== null) {
+            const { x, y } = position;
+            const direction = carSize.width === 1 ? 'vertical' : 'horizontal';
+            cars.push(new Car(x, y, carSize.width, carSize.height, carSizes.indexOf(carSize), direction));
+            drawParkingLot();
+            attempts = 0;
+        } else {
+            attempts++;
+        }
 
-         cars.push(new Car(x, y, carSize.width, carSize.height, carSizes.indexOf(carSize), direction));
+        if (attempts >= maxAttempts) {
+            console.warn("No se pudo encontrar más espacio para carros.");
+            break;
+        }
     }
 }
-
 
 canvas.addEventListener('click', (e) => {
     if (isCarMoving) return;
@@ -130,8 +127,6 @@ function drawParkingLot() {
     ctx.fillText("Puntaje: " + score, 10, 20);
 }
 
-
 loadCarImages(() => {
-    createRandomCars(9);
-    drawParkingLot();
+    fillParkingLot();
 });

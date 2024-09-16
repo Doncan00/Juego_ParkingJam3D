@@ -4,35 +4,20 @@ class Car {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.imageIndex = imageIndex;
-        this.direction = direction;
+        this.imageIndex = imageIndex; // Índice de la imagen del carro
+        this.direction = direction; // Vertical u horizontal
     }
 
     draw() {
         const img = carImages[this.imageIndex];
         if (img) {
-            ctx.drawImage(
-                img,
-                this.x * gridSize, this.y * gridSize,
-                this.width * gridSize, this.height * gridSize
-            );
+            ctx.drawImage(img, this.x * gridSize, this.y * gridSize, this.width * gridSize, this.height * gridSize);
         }
     }
-
 
     containsPoint(px, py) {
         return px >= this.x * gridSize && px <= (this.x + this.width) * gridSize &&
                py >= this.y * gridSize && py <= (this.y + this.height) * gridSize;
-    }
-
-    collidesWith(x, y, width, height) {
-        return cars.some(otherCar => 
-            otherCar !== this && 
-            !(x + width <= otherCar.x || 
-              x >= otherCar.x + otherCar.width || 
-              y + height <= otherCar.y || 
-              y >= otherCar.y + otherCar.height)
-        );
     }
 
     canMove(dx, dy) {

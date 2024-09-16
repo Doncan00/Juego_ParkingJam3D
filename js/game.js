@@ -1,31 +1,19 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
-
 const gridSize = 50;
-const parkingLotRows = 10; // Número de filas del estacionamiento
-const parkingLotCols = 10; // Número de columnas del estacionamiento
-const parkingLotWidth = parkingLotCols * gridSize;
-const parkingLotHeight = parkingLotRows * gridSize;
-let parkingX, parkingY;
-
+const parkingLotWidth = 15; // Tamaño del estacionamiento en el número de celdas
+const parkingLotHeight = 10; // Tamaño del estacionamiento en el número de celdas
+const canvasWidth = window.innerWidth;
+const canvasHeight = window.innerHeight;
+const parkingWidth = parkingLotWidth * gridSize;
+const parkingHeight = parkingLotHeight * gridSize;
+const parkingX = (canvasWidth - parkingWidth) / 2;
+const parkingY = (canvasHeight - parkingHeight) / 2;
 let cars = [];
 let score = 0;
 let isCarMoving = false;
 
 const carImages = {};
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    parkingX = (canvas.width - parkingLotWidth) / 2;
-    parkingY = (canvas.height - parkingLotHeight) / 2;
-
-    drawParkingLot();
-}
-
-window.addEventListener('resize', resizeCanvas); 
-resizeCanvas();
 
 function loadCarImages(callback) {
     let imagesLoaded = 0;
@@ -51,7 +39,7 @@ const carSizes = [
 ];
 
 function isPositionValid(x, y, width, height) {
-    if (x < 0 || y < 0 || x + width > parkingLotCols || y + height > parkingLotRows) {
+    if (x < 0 || y < 0 || x + width > parkingLotWidth || y + height > parkingLotHeight) {
         return false;
     }
 
@@ -76,8 +64,8 @@ function getRandomPosition(size) {
     const maxAttempts = 100;
 
     do {
-        x = Math.floor(Math.random() * (parkingLotCols - width + 1));
-        y = Math.floor(Math.random() * (parkingLotRows - height + 1));
+        x = Math.floor(Math.random() * (parkingLotWidth - width + 1));
+        y = Math.floor(Math.random() * (parkingLotHeight - height + 1));
         attempts++;
     } while (!isPositionValid(x, y, width, height) && attempts < maxAttempts);
 
@@ -114,10 +102,10 @@ function fillParkingLot() {
 }
 
 function drawParkingLot() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     ctx.fillStyle = '#CCCCCC';
-    ctx.fillRect(parkingX, parkingY, parkingLotWidth, parkingLotHeight);
+    ctx.fillRect(parkingX, parkingY, parkingWidth, parkingHeight);
 
     cars.forEach(car => {
         car.draw();
@@ -128,6 +116,8 @@ function drawParkingLot() {
     ctx.fillText("Puntaje: " + score, 10, 20);
 }
 
+canvas.width = canvasWidth;
+canvas.height = canvasHeight;
 
 canvas.addEventListener('click', (e) => {
     if (isCarMoving) return;

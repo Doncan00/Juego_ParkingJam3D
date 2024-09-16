@@ -11,13 +11,23 @@ class Car {
     draw() {
         const img = carImages[this.imageIndex];
         if (img) {
-            ctx.drawImage(img, this.x * gridSize, this.y * gridSize, this.width * gridSize, this.height * gridSize);
+            ctx.drawImage(
+                img,
+                parkingX + this.x * gridSize,
+                parkingY + this.y * gridSize,
+                this.width * gridSize,
+                this.height * gridSize
+            );
         }
     }
 
     containsPoint(px, py) {
-        return px >= this.x * gridSize && px <= (this.x + this.width) * gridSize &&
-               py >= this.y * gridSize && py <= (this.y + this.height) * gridSize;
+        return (
+            px >= parkingX + this.x * gridSize &&
+            px <= parkingX + (this.x + this.width) * gridSize &&
+            py >= parkingY + this.y * gridSize &&
+            py <= parkingY + (this.y + this.height) * gridSize
+        );
     }
 
     canMove(dx, dy) {
@@ -28,7 +38,6 @@ class Car {
         if (newX + this.width > parkingLotWidth) newX = 0;
         if (newY < 0) newY = parkingLotHeight - this.height;
         if (newY + this.height > parkingLotHeight) newY = 0;
-
 
         for (let otherCar of cars) {
             if (otherCar !== this) {
@@ -49,9 +58,9 @@ class Car {
 
         let dx = 0, dy = 0;
         if (this.height === 1) {
-            dx = Math.random() > 0.5 ? 1 : -1; 
+            dx = Math.random() > 0.5 ? 1 : -1;
         } else if (this.width === 1) {
-            dy = Math.random() > 0.5 ? 1 : -1; 
+            dy = Math.random() > 0.5 ? 1 : -1;
         } else {
             return;
         }

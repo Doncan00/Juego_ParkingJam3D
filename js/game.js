@@ -1,19 +1,22 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
-const gridSize = 50;
-const parkingLotWidth = 15; // Tamaño del estacionamiento en el número de celdas
-const parkingLotHeight = 10; // Tamaño del estacionamiento en el número de celdas
-const canvasWidth = window.innerWidth;
-const canvasHeight = window.innerHeight;
-const parkingWidth = parkingLotWidth * gridSize;
-const parkingHeight = parkingLotHeight * gridSize;
-const parkingX = (canvasWidth - parkingWidth) / 2;
-const parkingY = (canvasHeight - parkingHeight) / 2;
+const gridSize = 50; // Tamaño de la celda en píxeles
+let parkingLotWidth, parkingLotHeight; // Dimensiones del estacionamiento
+let parkingX, parkingY; // Posición del estacionamiento en el canvas
+let parkingWidth, parkingHeight; // Dimensiones del estacionamiento en el canvas
 let cars = [];
 let score = 0;
 let isCarMoving = false;
+const buttonWidth = 100;
+const buttonHeight = 50;
 
 const carImages = {};
+
+const buttons = [
+    { x: 10, y: 110, width: buttonWidth, height: buttonHeight, label: 'Fácil', level: 'easy' },
+    { x: 10, y: 170, width: buttonWidth, height: buttonHeight, label: 'Medio', level: 'medium' },
+    { x: 10, y: 230, width: buttonWidth, height: buttonHeight, label: 'Difícil', level: 'hard' }
+];
 
 function loadCarImages(callback) {
     let imagesLoaded = 0;
@@ -37,6 +40,24 @@ const carSizes = [
     { width: 2, height: 1, imageSrc: './img/carHor2.png' },
     { width: 3, height: 1, imageSrc: './img/carHor3.png' }
 ];
+
+function setDifficulty(level) {
+    switch (level) {
+        case 'easy':
+            parkingLotWidth = 5;
+            parkingLotHeight = 5;
+            break;
+        case 'medium':
+            parkingLotWidth = 10;
+            parkingLotHeight = 10;
+            break;
+        case 'hard':
+            parkingLotWidth = 15;
+            parkingLotHeight = 15;
+            break;
+    }
+    initGame();
+}
 
 function isPositionValid(x, y, width, height) {
     if (x < 0 || y < 0 || x + width > parkingLotWidth || y + height > parkingLotHeight) {
@@ -101,8 +122,20 @@ function fillParkingLot() {
     }
 }
 
+function drawButtons() {
+    buttons.forEach(button => {
+        ctx.fillStyle = '#CCCCCC';
+        ctx.fillRect(button.x, button.y, button.width, button.height);
+        ctx.fillStyle = 'black';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(button.label, button.x + button.width / 2, button.y + button.height / 2);
+    });
+}
+
 function drawParkingLot() {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = '#CCCCCC';
     ctx.fillRect(parkingX, parkingY, parkingWidth, parkingHeight);
@@ -113,11 +146,33 @@ function drawParkingLot() {
 
     ctx.font = "20px Arial";
     ctx.fillStyle = "black";
-    ctx.fillText("Puntaje: " + score, 10, 20);
+    ctx.fillText("Puntaje: " + score, 60, 60);
+
+    drawButtons();
 }
 
-canvas.width = canvasWidth;
-canvas.height = canvasHeight;
+function initGame() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    parkingWidth = parkingLotWidth * gridSize;
+    parkingHeight = parkingLotHeight * gridSize;
+    parkingX = (canvas.width - parkingWidth) / 2;
+    parkingY = (canvas.height - parkingHeight) / 2;
+
+    cars = [];
+    score = 0;
+    isCarMoving = false;
+
+    loadCarImages(() => {
+        fillParkingLot();
+    });
+}
+
+function isPointInRect(px, py, rect) {
+    return px >= rect.x && px <= rect.x + rect.width &&
+           py >= rect.y && py <= rect.y + rect.height;
+}
 
 canvas.addEventListener('click', (e) => {
     if (isCarMoving) return;
@@ -125,6 +180,13 @@ canvas.addEventListener('click', (e) => {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
+
+    for (let button of buttons) {
+        if (isPointInRect(mouseX, mouseY, button)) {
+            setDifficulty(button.level);
+            return;
+        }
+    }
 
     for (let car of cars) {
         if (car.containsPoint(mouseX, mouseY)) {
@@ -135,6 +197,4 @@ canvas.addEventListener('click', (e) => {
     }
 });
 
-loadCarImages(() => {
-    fillParkingLot();
-});
+setDifficulty('easy');

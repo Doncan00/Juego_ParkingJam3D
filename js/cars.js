@@ -69,7 +69,6 @@ class Car {
                     drawParkingLot();
                     clearInterval(interval);
                     isCarMoving = false;
-                    alert('¡Auto salió del estacionamiento! Puntaje: ' + score);
                 } else {
                     drawParkingLot();
                 }

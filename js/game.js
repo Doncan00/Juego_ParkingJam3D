@@ -18,54 +18,67 @@ function getRandomColor() {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
-function calculateAvailablePositions() {
-    let availablePositions = [];
-    
-    for (let x = 0; x < parkingLotWidth; x++) {
-        for (let y = 0; y < parkingLotHeight; y++) {
-            carSizes.forEach(size => {
-                const { width, height } = size;
-                
-                if (x + width <= parkingLotWidth && y + height <= parkingLotHeight) {
-                    const isValidPosition = !walls.some(wall =>
-                        x < wall.x + wall.width &&
-                        x + width > wall.x &&
-                        y < wall.y + wall.height &&
-                        y + height > wall.y
-                    ) && !cars.some(car => car.collidesWith(x, y, width, height));
+function isPositionValid(x, y, width, height) {
+    if (x < 1 || y < 1 || x + width > parkingLotWidth - 1 || y + height > parkingLotHeight - 1) {
+        return false;
+    }
 
-                    if (isValidPosition) {
-                        availablePositions.push({ x, y, width, height });
-                    }
-                }
-            });
+    for (let car of cars) {
+        if (
+            x < car.x + car.width &&
+            x + width > car.x &&
+            y < car.y + car.height &&
+            y + height > car.y
+        ) {
+            return false;
         }
     }
-    
-    return availablePositions;
+
+    return true;
+}
+
+
+
+function getRandomPosition(size) {
+    const { width, height } = size;
+    let x, y;
+    let attempts = 0;
+    const maxAttempts = 100;
+
+    do {
+        x = Math.floor(Math.random() * (parkingLotWidth - width + 1));
+        y = Math.floor(Math.random() * (parkingLotHeight - height + 1));
+        attempts++;
+    } while (!isPositionValid(x, y, width, height) && attempts < maxAttempts);
+
+    if (attempts >= maxAttempts) {
+        console.error("No se pudo encontrar una posición válida para el carro.");
+        return null;
+    }
+
+    return { x, y };
 }
 
 function createRandomCars(numCars) {
-    const availablePositions = calculateAvailablePositions();
-    
-    if (availablePositions.length < numCars) {
-        console.error("No hay suficientes posiciones disponibles para crear todos los autos.");
-        return;
-    }
-    
     for (let i = 0; i < numCars; i++) {
-        const position = availablePositions.splice(Math.floor(Math.random() * availablePositions.length), 1)[0];
-        const { x, y, width, height } = position;
-        const direction = width === 1 ? 'vertical' : 'horizontal'; 
+        const size = carSizes[Math.floor(Math.random() * carSizes.length)];
+        const direction = size.width === 1 ? 'vertical' : 'horizontal';
 
-        cars.push(new Car(x, y, width, height, getRandomColor(), direction));
+        let position;
+        do {
+            position = getRandomPosition(size);
+        } while (position === null);
+
+        const { x, y } = position;
+
+        cars.push(new Car(x, y, size.width, size.height, getRandomColor(), direction));
     }
 }
 
-createRandomCars(9); 
+createRandomCars(9);
 
 canvas.addEventListener('click', (e) => {
-    if (isCarMoving) return; 
+    if (isCarMoving) return;
 
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
@@ -73,7 +86,7 @@ canvas.addEventListener('click', (e) => {
 
     for (let car of cars) {
         if (car.containsPoint(mouseX, mouseY)) {
-            car.moveAutomatically(); 
+            car.moveAutomatically();
             isCarMoving = true;
             break;
         }
@@ -83,6 +96,11 @@ canvas.addEventListener('click', (e) => {
 function drawParkingLot() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     createWalls();
+
+    exits.forEach(exit => {
+        ctx.fillStyle = "green";
+        ctx.fillRect(exit.x * gridSize, exit.y * gridSize, exit.width * gridSize, exit.height * gridSize);
+    });
 
     cars.forEach(car => {
         car.draw();

@@ -105,6 +105,8 @@ class Car {
         }, 100);
     }
 
+    
+
     isInExit(exit) {
         return (
             this.x >= exit.x &&

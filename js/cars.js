@@ -29,14 +29,6 @@ class Car {
         if (newY < 0) newY = parkingLotHeight - this.height;
         if (newY + this.height > parkingLotHeight) newY = 0;
 
-        for (let wall of walls) {
-            if (newX < wall.x + wall.width &&
-                newX + this.width > wall.x &&
-                newY < wall.y + wall.height &&
-                newY + this.height > wall.y) {
-                return false;
-            }
-        }
 
         for (let otherCar of cars) {
             if (otherCar !== this) {
@@ -76,31 +68,6 @@ class Car {
                 clearInterval(interval);
                 isCarMoving = false;
             }
-
-            for (let exit of exits) {
-                if (this.isInExit(exit)) {
-                    score++;
-
-                    cars.splice(cars.indexOf(this), 1);
-
-                    drawParkingLot();
-
-                    clearInterval(interval);
-                    isCarMoving = false; 
-
-                    alert('¡Auto salió del estacionamiento! Puntaje: ' + score);
-                    break;
-                }
-            }
         }, 100);
-    }
-
-    isInExit(exit) {
-        return (
-            this.x >= exit.x &&
-            this.x + this.width <= exit.x + exit.width &&
-            this.y >= exit.y &&
-            this.y + this.height <= exit.y + exit.height
-        );
     }
 }

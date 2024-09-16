@@ -1,6 +1,8 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
-
+const gridSize = 50;
+const parkingLotWidth = 10;
+const parkingLotHeight = 10;
 let cars = [];
 let score = 0;
 let isCarMoving = false;
@@ -111,12 +113,7 @@ canvas.addEventListener('click', (e) => {
 
 function drawParkingLot() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    createWalls();
-
-    exits.forEach(exit => {
-        ctx.fillStyle = "green";
-        ctx.fillRect(exit.x * gridSize, exit.y * gridSize, exit.width * gridSize, exit.height * gridSize);
-    });
+    // createWalls();
 
     cars.forEach(car => {
         car.draw();

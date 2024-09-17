@@ -2,21 +2,45 @@ let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 const gridSize = 50; // Tamaño de la celda en píxeles
 let parkingLotWidth, parkingLotHeight; // Dimensiones del estacionamiento
-let parkingX, parkingY; // Posición del estacionamiento en el canvas
-let parkingWidth, parkingHeight; // Dimensiones del estacionamiento en el canvas
+let parkingX, parkingY; // Posición del estacionamiento
+let parkingWidth, parkingHeight; 
 let cars = [];
 let score = 0;
 let isCarMoving = false;
+let isMusicPlaying = false;
 const buttonWidth = 100;
 const buttonHeight = 50;
 
 const carImages = {};
+const carSizes = [
+    { width: 1, height: 1, imageSrc: './img/carHor1.png' },
+    { width: 1, height: 2, imageSrc: './img/carVer2.png' },
+    { width: 1, height: 3, imageSrc: './img/carVer3.png' },
+    { width: 2, height: 1, imageSrc: './img/carHor2.png' },
+    { width: 3, height: 1, imageSrc: './img/carHor3.png' }
+];
 
 const buttons = [
     { x: 10, y: 110, width: buttonWidth, height: buttonHeight, label: 'Fácil', level: 'easy' },
     { x: 10, y: 170, width: buttonWidth, height: buttonHeight, label: 'Medio', level: 'medium' },
     { x: 10, y: 230, width: buttonWidth, height: buttonHeight, label: 'Difícil', level: 'hard' }
 ];
+
+const ambientMusic = new Audio('./audio/HansZimmer.mp3');
+const carMoveSound = new Audio('./audio/carMove.mp3');
+const carExitSound = new Audio('./audio/carExit.mp3');
+
+ambientMusic.loop = true;
+ambientMusic.volume = 0.5;
+carMoveSound.volume = 0.01;
+carExitSound.volume = 0.1;
+
+function startAmbientMusic() {
+    if (!isMusicPlaying) {
+        ambientMusic.play();
+        isMusicPlaying = true;
+    }
+}
 
 function loadCarImages(callback) {
     let imagesLoaded = 0;
@@ -32,14 +56,6 @@ function loadCarImages(callback) {
         };
     });
 }
-
-const carSizes = [
-    { width: 1, height: 1, imageSrc: './img/carHor1.png' },
-    { width: 1, height: 2, imageSrc: './img/carVer2.png' },
-    { width: 1, height: 3, imageSrc: './img/carVer3.png' },
-    { width: 2, height: 1, imageSrc: './img/carHor2.png' },
-    { width: 3, height: 1, imageSrc: './img/carHor3.png' }
-];
 
 function setDifficulty(level) {
     switch (level) {
@@ -175,6 +191,10 @@ function isPointInRect(px, py, rect) {
 }
 
 canvas.addEventListener('click', (e) => {
+    if (!isMusicPlaying) {
+        startAmbientMusic();
+    }
+
     if (isCarMoving) return;
 
     const rect = canvas.getBoundingClientRect();

@@ -46,6 +46,8 @@ class Car {
     moveAutomatically() {
         if (isCarMoving) return;
 
+        carMoveSound.play();
+
         let dx = 0, dy = 0;
         if (this.height === 1) {
             dx = Math.random() > 0.5 ? 1 : -1;
@@ -64,6 +66,7 @@ class Car {
                 this.y = newPos.y;
 
                 if (this.isOutOfParkingLot()) {
+                    carExitSound.play();
                     score += 50;
                     cars.splice(cars.indexOf(this), 1);
                     drawParkingLot();

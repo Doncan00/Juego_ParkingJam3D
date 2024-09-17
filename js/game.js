@@ -1,13 +1,15 @@
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
-const gridSize = 50; // Tamaño de la celda en píxeles
-let parkingLotWidth, parkingLotHeight; // Dimensiones del estacionamiento
-let parkingX, parkingY; // Posición del estacionamiento
-let parkingWidth, parkingHeight; 
+const gridSize = 50;
+let parkingLotWidth, parkingLotHeight;
+let parkingX, parkingY;
+let parkingWidth, parkingHeight;
 let cars = [];
 let score = 0;
 let isCarMoving = false;
-let isMusicPlaying = false;
+let isGameStarted = false;
+let timer = 0;
+let timerInterval = null;
 const buttonWidth = 100;
 const buttonHeight = 50;
 
@@ -35,11 +37,14 @@ ambientMusic.volume = 0.5;
 carMoveSound.volume = 0.01;
 carExitSound.volume = 0.1;
 
+let endGameImage = new Image();
+endGameImage.src = './img/hayClase.png';
+
+ambientMusic.loop = true;
+ambientMusic.volume = 0.5;
+
 function startAmbientMusic() {
-    if (!isMusicPlaying) {
-        ambientMusic.play();
-        isMusicPlaying = true;
-    }
+    ambientMusic.play();
 }
 
 function loadCarImages(callback) {
@@ -73,6 +78,17 @@ function setDifficulty(level) {
             break;
     }
     initGame();
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timer++;
+        drawParkingLot();
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
 }
 
 function isPositionValid(x, y, width, height) {
@@ -164,7 +180,23 @@ function drawParkingLot() {
     ctx.fillStyle = "black";
     ctx.fillText("Puntaje: " + score, 60, 60);
 
+    ctx.fillText("Tiempo: " + timer + "s", 60, 90);
+
     drawButtons();
+
+    if (cars.length === 0) {
+        stopTimer();
+        drawEndGameImage();
+    }
+}
+
+function drawEndGameImage() {
+    const imageWidth = 600;
+    const imageHeight = 600;
+    const x = (canvas.width - imageWidth) / 2;
+    const y = (canvas.height - imageHeight) / 2;
+    
+    ctx.drawImage(endGameImage, x, y, imageWidth, imageHeight);
 }
 
 function initGame() {
@@ -179,9 +211,13 @@ function initGame() {
     cars = [];
     score = 0;
     isCarMoving = false;
+    isGameStarted = false;
+    timer = 0;
+    stopTimer();
 
     loadCarImages(() => {
         fillParkingLot();
+        startAmbientMusic();
     });
 }
 
@@ -191,10 +227,6 @@ function isPointInRect(px, py, rect) {
 }
 
 canvas.addEventListener('click', (e) => {
-    if (!isMusicPlaying) {
-        startAmbientMusic();
-    }
-
     if (isCarMoving) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -210,6 +242,10 @@ canvas.addEventListener('click', (e) => {
 
     for (let car of cars) {
         if (car.containsPoint(mouseX, mouseY)) {
+            if (!isGameStarted) {
+                isGameStarted = true;
+                startTimer();
+            }
             car.moveAutomatically();
             isCarMoving = true;
             break;

@@ -217,7 +217,6 @@ function initGame() {
 
     loadCarImages(() => {
         fillParkingLot();
-        startAmbientMusic();
     });
 }
 
@@ -228,6 +227,7 @@ function isPointInRect(px, py, rect) {
 
 canvas.addEventListener('click', (e) => {
     if (isCarMoving) return;
+    startAmbientMusic();
 
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
